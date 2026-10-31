@@ -27,7 +27,9 @@ export default {
         headers: {
           "Content-Type": isScript ? "text/plain; charset=utf-8" : "text/html; charset=utf-8",
           "Cache-Control": "no-store",
-          "X-Content-Type-Options": "nosniff"
+          "X-Content-Type-Options": "nosniff",
+          "X-BerryIT-Site": isScript ? "network-utility-script" : "network-utility-blackjack-layout",
+          "X-BerryIT-Layout-Version": "2026-10-31-blackjack-match"
         }
       });
     } catch {
