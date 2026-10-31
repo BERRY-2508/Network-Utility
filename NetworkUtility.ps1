@@ -8,7 +8,7 @@ if ([Threading.Thread]::CurrentThread.GetApartmentState() -ne 'STA') {
 }
 Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase,System.Windows.Forms
 [xml]$xaml = @'
-<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Berry IT Network Utility | BERRY IT" Width="1190" Height="790" MinWidth="980" MinHeight="660" WindowStartupLocation="CenterScreen" Background="#0B0B0E" Foreground="#F4F4F4" FontFamily="Segoe UI" FontSize="13">
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Berry IT Network Utility | BERRY IT" Width="1190" Height="790" MinWidth="720" MinHeight="480" WindowStartupLocation="CenterScreen" Background="#0B0B0E" Foreground="#F4F4F4" FontFamily="Segoe UI" FontSize="13">
 <Window.Resources>
  <SolidColorBrush x:Key="Panel" Color="#1B1B20"/><SolidColorBrush x:Key="Line" Color="#303036"/><SolidColorBrush x:Key="Muted" Color="#ACAAB2"/>
  <Style TargetType="Button"><Setter Property="Background" Value="#29292F"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderBrush" Value="#44444B"/><Setter Property="Padding" Value="13,8"/><Setter Property="Margin" Value="0,0,8,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter></Style>
@@ -336,4 +336,15 @@ $script:jobTimer.Add_Tick({
 })
 $window.Add_Closed({$script:pingTimer.Stop();$script:jobTimer.Stop();$script:pingActive=$false;if($script:pinger){$script:pinger.Dispose()};foreach($j in @($script:workJob,$script:speedJob,$script:publicIPJob)){if($j){Stop-Job $j -ErrorAction SilentlyContinue;Remove-Job $j -Force -ErrorAction SilentlyContinue}}})
 Refresh-Network;Refresh-PublicIP;Refresh-Adapters;Display-SpeedEngine;Show-Page 'Dashboard';$script:jobTimer.Start()
+# WPF dimensions are in DPI-independent units. Clamp to the usable desktop
+# before first render so the standard Windows caption buttons remain visible.
+$window.Add_SourceInitialized({
+    $work = [System.Windows.SystemParameters]::WorkArea
+    $window.MinWidth = [Math]::Min(720, [Math]::Max(320, $work.Width - 32))
+    $window.MinHeight = [Math]::Min(480, [Math]::Max(240, $work.Height - 32))
+    $window.Width = [Math]::Min($window.Width, [Math]::Max(320, $work.Width - 32))
+    $window.Height = [Math]::Min($window.Height, [Math]::Max(240, $work.Height - 32))
+    $window.Left = $work.Left + [Math]::Max(0, ($work.Width - $window.Width) / 2)
+    $window.Top = $work.Top + [Math]::Max(0, ($work.Height - $window.Height) / 2)
+})
 [void]$window.ShowDialog()
